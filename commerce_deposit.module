@@ -20,10 +20,69 @@ function commerce_deposit_menu() {
  * Settings form builder.
  */
 function commerce_deposit_settings_form($form, &$form_state) {
-  $types = commerce_product_types();
-  dpm($types);
+  
+  // Since we don't support the automatic creation of all the fields, entities,
+  // entity types to accommodate this module upon installation, let's display
+  // some status messages to indicate the proper configuration of this module.
+  
+  $form['#prefix'] = t('View the README for complete details.') . '&nbsp;' .
+    l('README', drupal_get_path('module', 'commerce_deposit') . '/README.md');
+  
+  // Grab a list of all the fields.
   $fields = field_info_field_map();
+  dpm('fields');
   dpm($fields);
+  
+  // Verify the Deposit line item type is set up properly.
+  /*$line_item_types = commerce_line_item_types();
+  dpm('line_item_types');
+  dpm($line_item_types);*/
+  if (
+    !isset($fields['field_commerce_deposit_product']) ||
+    $fields['field_commerce_deposit_product']['type'] != 'entityreference' ||
+    !isset($fields['field_commerce_deposit_product']['bundles']) ||
+    !isset($fields['field_commerce_deposit_product']['bundles']['commerce_line_item']) ||
+    !in_array('deposit', $fields['field_commerce_deposit_product']['bundles']['commerce_line_item'])
+  ) {
+    drupal_set_message(
+      t('You must add the Entity Reference field (field_commerce_deposit_product) to the Deposit line item type.'),
+      'warning'
+    );
+    drupal_set_message(
+      l(
+        t('Add Entity Reference field to Deposit line item type'),
+        'admin/commerce/config/line-items/deposit/fields'
+      ),
+      'warning'
+    );
+  }
+  
+  // Verify the product type is set up properly. Make sure at least one product
+  // type has the boolean field added to it.
+  $product_types = commerce_product_types();
+  dpm('product_types');
+  dpm($product_types);
+  if (
+    !isset($fields['field_commerce_deposit'])/* ||
+    $fields['field_commerce_deposit_product']['type'] != 'entityreference' ||
+    !isset($fields['field_commerce_deposit_product']['bundles']) ||
+    !isset($fields['field_commerce_deposit_product']['bundles']['commerce_line_item']) ||
+    !in_array('deposit', $fields['field_commerce_deposit_product']['bundles']['commerce_line_item'])
+  */) {
+    drupal_set_message(
+      t('You must add the Boolean field (field_commerce_deposit) to a Product type'),
+      'warning'
+    );
+    drupal_set_message(
+      l(
+        t('Add Boolean field to a Product type'),
+        'admin/commerce/products/types'
+      ),
+      'warning'
+    );
+  }
+  
+  
   /*if (!isset($fields[])) {
   }*/
   $form['commerce_deposit'] = array(
