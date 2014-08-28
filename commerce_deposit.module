@@ -21,6 +21,22 @@ function commerce_deposit_menu() {
  */
 function commerce_deposit_settings_form($form, &$form_state) {
   
+  _commerce_deposit_check_config();
+  
+  /*if (!isset($fields[])) {
+  }*/
+  $form['commerce_deposit'] = array(
+    '#markup' => '<p>Hello</p>'
+  );
+  return system_settings_form($form);
+  
+}
+
+/**
+ * An internal function used to check if the module has been configured properly.
+ */
+function _commerce_deposit_check_config() {
+  
   // Since we don't support the automatic creation of all the fields, entities,
   // entity types to accommodate this module upon installation, let's display
   // some status messages to indicate the proper configuration of this module.
@@ -63,12 +79,12 @@ function commerce_deposit_settings_form($form, &$form_state) {
   dpm('product_types');
   dpm($product_types);
   if (
-    !isset($fields['field_commerce_deposit'])/* ||
-    $fields['field_commerce_deposit_product']['type'] != 'entityreference' ||
-    !isset($fields['field_commerce_deposit_product']['bundles']) ||
-    !isset($fields['field_commerce_deposit_product']['bundles']['commerce_line_item']) ||
-    !in_array('deposit', $fields['field_commerce_deposit_product']['bundles']['commerce_line_item'])
-  */) {
+    !isset($fields['field_commerce_deposit']) ||
+    $fields['field_commerce_deposit']['type'] != 'list_boolean' ||
+    !isset($fields['field_commerce_deposit']['bundles']) ||
+    !isset($fields['field_commerce_deposit']['bundles']['commerce_product']) ||
+    sizeof($fields['field_commerce_deposit']['bundles']['commerce_product']) == 0
+  ) {
     drupal_set_message(
       t('You must add the Boolean field (field_commerce_deposit) to a Product type'),
       'warning'
@@ -82,13 +98,6 @@ function commerce_deposit_settings_form($form, &$form_state) {
     );
   }
   
-  
-  /*if (!isset($fields[])) {
-  }*/
-  $form['commerce_deposit'] = array(
-    '#markup' => '<p>Hello</p>'
-  );
-  return system_settings_form($form);
 }
 
 /**
